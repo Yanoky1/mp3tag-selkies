@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+set -e
+
+export XDG_RUNTIME_DIR="/config/.XDG"
+export WINEPREFIX="/config/.wine"
+export WINEARCH="win64"
+export WINEDEBUG="-all"
+
+mkdir -p "$XDG_RUNTIME_DIR"
+chmod 700 "$XDG_RUNTIME_DIR" 2>/dev/null || true
+
+if [ ! -f "/opt/mp3tag/Mp3tag.exe" ]; then
+    echo "ERROR: Mp3tag.exe not found!"
+    exit 1
+fi
+
+mkdir -p "$WINEPREFIX"
+
+if [ ! -f "$WINEPREFIX/system.reg" ]; then
+    echo "Creating Wine prefix..."
+    wineboot --init
+    wineserver -w
+    echo "Wine prefix created."
+fi
+
+# Не плодим повторные копии Mp3tag, если один экземпляр уже жив
+if pgrep -f "Mp3tag.exe" > /dev/null 2>&1; then
+    echo "Mp3tag already running, waiting instead of relaunching..."
+    wait
+    exit 0
+fi
+
+echo "Launching Mp3tag..."
+exec wine "/opt/mp3tag/Mp3tag.exe"

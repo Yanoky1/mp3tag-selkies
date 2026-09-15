@@ -1,0 +1,23 @@
+services:
+  mp3tag:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: mp3tag-selkies:latest
+    container_name: mp3tag
+
+    ports:
+      - "3001:3001"
+
+    environment:
+      TITLE: "Mp3tag"
+      PIXELFLUX_WAYLAND: "true"
+      RESTART_APP: "true"
+      WINEDEBUG: "-all"
+
+    volumes:
+      - ./config:/config
+      - ./music:/music
+
+    shm_size: 1gb
+    restart: unless-stopped
